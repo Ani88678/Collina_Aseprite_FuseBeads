@@ -1,6 +1,6 @@
 -- ============================================================================
--- MARD Palette v4.1 (English Version)
--- Features: 221/273 Color Mode Toggle, Convert, Dynamic Highlight, Label Every Pixel
+-- MARD Palette v4.2 (English Version - UI Optimized)
+-- Features: 221/273 Mode, Convert, Dynamic Highlight, Label Pixels, Sleek UI
 -- ============================================================================
 local MARD = {}
 
@@ -23,7 +23,6 @@ MARD.FONT_3X5 = {
   ['0'] = { "111", "101", "101", "101", "111" }, ['1'] = { "010", "110", "010", "010", "111" }, ['2'] = { "111", "001", "111", "100", "111" }, ['3'] = { "111", "001", "111", "001", "111" }, ['4'] = { "101", "101", "111", "001", "001" }, ['5'] = { "111", "100", "111", "001", "111" }, ['6'] = { "111", "100", "111", "101", "111" }, ['7'] = { "111", "001", "010", "010", "010" }, ['8'] = { "111", "101", "111", "101", "111" }, ['9'] = { "111", "101", "111", "001", "111" }, ['A'] = { "010", "101", "111", "101", "101" }, ['B'] = { "110", "101", "110", "101", "110" }, ['C'] = { "011", "100", "100", "100", "011" }, ['D'] = { "110", "101", "101", "101", "110" }, ['E'] = { "111", "100", "110", "100", "111" }, ['F'] = { "111", "100", "110", "100", "100" }, ['G'] = { "011", "100", "101", "101", "011" }, ['H'] = { "101", "101", "111", "101", "101" }, ['M'] = { "101", "111", "101", "101", "101" }, ['P'] = { "111", "101", "111", "100", "100" }, ['R'] = { "110", "101", "110", "101", "101" }, ['T'] = { "111", "010", "010", "010", "010" },
 }
 
--- Globals for State
 local useFullMode = false
 local currentCat = "All"
 local selectedIndex = nil
@@ -34,32 +33,22 @@ local isDragging = false
 local dragStartMouseY = 0
 local dragStartScrollY = 0
 
--- UI Constants
 local COLS = 5; local CELL_SIZE = 19; local GAP = 1; local MARGIN = 3; 
 local SCROLL_TRACK_W = 6; local SCROLL_BAR_W = 4; local MAX_VIEWPORT_H = 220; 
 local FIXED_VIEWPORT_W = MARGIN * 2 + COLS * CELL_SIZE + (COLS - 1) * GAP + SCROLL_TRACK_W + 2
 
--- Helper: Get active color list based on Full Mode Toggle
 local function getActiveColors()
   local list = {}
   for _, c in ipairs(MARD.COLORS) do
-    if useFullMode or (c.cat ~= "P" and c.cat ~= "R" and c.cat ~= "T") then
-      table.insert(list, c)
-    end
+    if useFullMode or (c.cat ~= "P" and c.cat ~= "R" and c.cat ~= "T") then table.insert(list, c) end
   end
   return list
 end
 
--- Helper: Get category options for Combobox
 local function getCatOptions()
-  if useFullMode then
-    return { "All", "A", "B", "C", "D", "E", "F", "G", "H", "M", "P", "R", "T" }
-  else
-    return { "All", "A", "B", "C", "D", "E", "F", "G", "H", "M" }
-  end
+  return useFullMode and { "All", "A", "B", "C", "D", "E", "F", "G", "H", "M", "P", "R", "T" } or { "All", "A", "B", "C", "D", "E", "F", "G", "H", "M" }
 end
 
--- Nearest Color algorithm
 function MARD.findNearestColor(r, g, b, colorList)
   local bestDist, bestColor = math.huge, colorList[1]
   for _, c in ipairs(colorList) do
@@ -69,7 +58,6 @@ function MARD.findNearestColor(r, g, b, colorList)
   return bestColor
 end
 
--- Pixel Text Drawer
 function MARD.drawPixelText(ctxOrImg, text, startX, startY, color, isCanvas)
   if isCanvas then ctxOrImg.color = color end
   local curX = startX
@@ -91,15 +79,12 @@ function MARD.drawPixelText(ctxOrImg, text, startX, startY, color, isCanvas)
   end
 end
 
--- Scroll Helpers
 local currentList = {}
 local function updateCurrentList()
   local baseColors = getActiveColors()
   currentList = {}
   if currentCat == "All" then currentList = baseColors else
-    for _, item in ipairs(baseColors) do
-      if item.cat == currentCat then table.insert(currentList, item) end
-    end
+    for _, item in ipairs(baseColors) do if item.cat == currentCat then table.insert(currentList, item) end end
   end
 end
 
@@ -130,16 +115,11 @@ local function getIndexAt(x, y)
   return nil
 end
 
--- Function to dynamically update the highlight mask
 local function updateHighlightIfActive(sprite)
   if not sprite then return end
-  
-  -- Check if mask exists
   local hlLayer = nil
-  for _, l in ipairs(sprite.layers) do
-    if l.name == "MARD_Highlight_Mask" then hlLayer = l break end
-  end
-  if not hlLayer then return end -- Mask is not toggled on
+  for _, l in ipairs(sprite.layers) do if l.name == "MARD_Highlight_Mask" then hlLayer = l break end end
+  if not hlLayer then return end 
   
   local tc = nil
   local currentModeColors = getActiveColors()
@@ -148,8 +128,6 @@ local function updateHighlightIfActive(sprite)
   
   local originalLayer = app.activeLayer
   app.transaction("Update Highlight", function()
-    -- CRITICAL: Hide the mask layer before taking a snapshot of the canvas!
-    -- Otherwise the script reads its own black mask pixels and ruins the calculation.
     hlLayer.isVisible = false 
     local flatImg = Image(sprite)
     hlLayer.isVisible = true 
@@ -170,7 +148,6 @@ local function updateHighlightIfActive(sprite)
     end
     cel.image = img
   end)
-  -- Return focus to the drawing layer
   app.activeLayer = originalLayer
   app.refresh()
 end
@@ -179,24 +156,22 @@ local createDialog
 createDialog = function(savedPos)
   updateCurrentList()
   
-  local dlg = Dialog{ title = "MARD Palette v4.1" }
+  local dlg = Dialog{ title = "MARD Palette v4.2" }
   
-  -- 1. Full Mode Checkbox
+  -- Top UI
   dlg:check{
     id = "full_mode",
-    text = "Full Color Mode (Inc. P, R, T)",
+    text = "Full Palette (273)",
     selected = useFullMode,
     onclick = function()
       useFullMode = dlg.data.full_mode
-      if not useFullMode and (currentCat == "P" or currentCat == "R" or currentCat == "T") then
-        currentCat = "All"
-      end
+      if not useFullMode and (currentCat == "P" or currentCat == "R" or currentCat == "T") then currentCat = "All" end
       scrollY = 0; selectedIndex = nil; hoveredIndex = nil
       local bounds = dlg.bounds; dlg:close(); createDialog({ x = bounds.x, y = bounds.y, width = bounds.width })
     end
   }
   
-  -- 2. Category Filter Combobox
+  dlg:newrow()
   dlg:combobox{
     id = "cat_filter", options = getCatOptions(), option = currentCat,
     onchange = function()
@@ -207,7 +182,8 @@ createDialog = function(savedPos)
     end
   }
 
-  -- 3. Canvas
+  -- Canvas
+  dlg:newrow()
   dlg:canvas{
     id = "palette_canvas", width = FIXED_VIEWPORT_W, height = getActiveViewportH(),
     onpaint = function(ev)
@@ -243,10 +219,8 @@ createDialog = function(savedPos)
           selectedIndex = idx; 
           activeId = currentList[idx].id; 
           app.fgColor = Color{ r = currentList[idx].r, g = currentList[idx].g, b = currentList[idx].b }; 
-          dlg:modify{ id = "active_lbl", text = "Active: " .. activeId }; 
+          dlg:modify{ id = "info_lbl", text = "Sel: " .. activeId .. "  |  Hov: " .. activeId }; 
           dlg:repaint() 
-          
-          -- NEW: Automatically refresh mask when clicking a color in the palette
           updateHighlightIfActive(app.activeSprite)
         end
       end
@@ -256,19 +230,21 @@ createDialog = function(savedPos)
       local idx = getIndexAt(ev.x, ev.y)
       if idx ~= hoveredIndex then 
         hoveredIndex = idx
-        dlg:modify{ id = "hover_lbl", text = "Hover: " .. (idx and currentList[idx].id or "-") }
+        dlg:modify{ id = "info_lbl", text = "Sel: " .. activeId .. "  |  Hov: " .. (idx and currentList[idx].id or "-") }
         dlg:repaint() 
       end
     end,
     onmouseup = function(ev) if isDragging then isDragging = false; dlg:repaint() end end
   }
 
+  -- Compact Status Row
   dlg:separator()
-  dlg:label{ id = "active_lbl", text = "Active: " .. activeId }
-  dlg:label{ id = "hover_lbl",  text = "Hover: -" }
+  dlg:label{ id = "info_lbl", text = "Sel: " .. activeId .. "  |  Hov: -" }
   
-  -- Button 1: Convert All
-  dlg:button{ id = "btn_convert", text = "Convert All",
+  -- Tools Section (Vertically Stacked for slim UI)
+  dlg:separator{ text = "Tools" }
+  
+  dlg:button{ id = "btn_convert", text = "Convert Image",
     onclick = function()
       if not app.activeSprite then return app.alert("Open a sprite first!") end
       local currentModeColors = getActiveColors()
@@ -290,8 +266,9 @@ createDialog = function(savedPos)
       app.refresh()
     end
   }
-
-  -- Button 2: Toggle Highlight
+  
+  dlg:newrow()
+  
   dlg:button{ id = "btn_highlight", text = "Toggle Highlight",
     onclick = function()
       local sprite = app.activeSprite
@@ -302,14 +279,12 @@ createDialog = function(savedPos)
         if l.name == "MARD_Highlight_Mask" then hlLayer = l break end
       end
       
-      -- If mask exists, clear it
       if hlLayer then
         app.transaction("Clear Highlight", function() sprite:deleteLayer(hlLayer) end)
         app.refresh()
         return
       end
       
-      -- Create mask logic
       if activeId == "-" then return app.alert("Select a base color from the palette first!") end
       
       local originalLayer = app.activeLayer
@@ -318,13 +293,13 @@ createDialog = function(savedPos)
         hlLayer.name = "MARD_Highlight_Mask"
       end)
       app.activeLayer = originalLayer
-      
       updateHighlightIfActive(sprite)
     end
   }
 
-  -- Button 3: Label Every Pixel
-  dlg:button{ id = "btn_label", text = "Label Every Pixel",
+  dlg:newrow()
+  
+  dlg:button{ id = "btn_label", text = "Label Pixels",
     onclick = function()
       local sprite = app.activeSprite
       if not sprite then return app.alert("Open a sprite first!") end
