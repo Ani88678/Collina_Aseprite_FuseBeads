@@ -1,6 +1,6 @@
 -- ============================================================================
--- MARD Palette v4.0 (English Version)
--- Features: 221/273 Color Mode Toggle, Convert, Toggle Highlight, Label Every Pixel
+-- MARD Palette v4.1 (English Version)
+-- Features: 221/273 Color Mode Toggle, Convert, Dynamic Highlight, Label Every Pixel
 -- ============================================================================
 local MARD = {}
 
@@ -59,7 +59,7 @@ local function getCatOptions()
   end
 end
 
--- Nearest Color algorithm (Now takes a specific color list)
+-- Nearest Color algorithm
 function MARD.findNearestColor(r, g, b, colorList)
   local bestDist, bestColor = math.huge, colorList[1]
   for _, c in ipairs(colorList) do
@@ -130,11 +130,56 @@ local function getIndexAt(x, y)
   return nil
 end
 
+-- Function to dynamically update the highlight mask
+local function updateHighlightIfActive(sprite)
+  if not sprite then return end
+  
+  -- Check if mask exists
+  local hlLayer = nil
+  for _, l in ipairs(sprite.layers) do
+    if l.name == "MARD_Highlight_Mask" then hlLayer = l break end
+  end
+  if not hlLayer then return end -- Mask is not toggled on
+  
+  local tc = nil
+  local currentModeColors = getActiveColors()
+  for _, c in ipairs(currentModeColors) do if c.id == activeId then tc = c break end end
+  if not tc then return end
+  
+  local originalLayer = app.activeLayer
+  app.transaction("Update Highlight", function()
+    -- CRITICAL: Hide the mask layer before taking a snapshot of the canvas!
+    -- Otherwise the script reads its own black mask pixels and ruins the calculation.
+    hlLayer.isVisible = false 
+    local flatImg = Image(sprite)
+    hlLayer.isVisible = true 
+    
+    local cel = hlLayer:cel(app.activeFrame)
+    if not cel then cel = sprite:newCel(hlLayer, app.activeFrame) end
+    local img = Image(sprite.width, sprite.height, ColorMode.RGB)
+    
+    for it in flatImg:pixels() do
+      if app.pixelColor.rgbaA(it()) > 0 then
+        local pr, pg, pb = app.pixelColor.rgbaR(it()), app.pixelColor.rgbaG(it()), app.pixelColor.rgbaB(it())
+        if pr == tc.r and pg == tc.g and pb == tc.b then 
+          img:drawPixel(it.x, it.y, app.pixelColor.rgba(pr, pg, pb, 255))
+        else 
+          img:drawPixel(it.x, it.y, app.pixelColor.rgba(0, 0, 0, 180)) 
+        end
+      end
+    end
+    cel.image = img
+  end)
+  -- Return focus to the drawing layer
+  app.activeLayer = originalLayer
+  app.refresh()
+end
+
 local createDialog
 createDialog = function(savedPos)
   updateCurrentList()
   
-  local dlg = Dialog{ title = "MARD Palette v4.0" }
+  local dlg = Dialog{ title = "MARD Palette v4.1" }
   
   -- 1. Full Mode Checkbox
   dlg:check{
@@ -194,7 +239,16 @@ createDialog = function(savedPos)
           return
         end
         local idx = getIndexAt(ev.x, ev.y)
-        if idx then selectedIndex = idx; activeId = currentList[idx].id; app.fgColor = Color{ r = currentList[idx].r, g = currentList[idx].g, b = currentList[idx].b }; dlg:modify{ id = "active_lbl", text = "Active: " .. activeId }; dlg:repaint() end
+        if idx then 
+          selectedIndex = idx; 
+          activeId = currentList[idx].id; 
+          app.fgColor = Color{ r = currentList[idx].r, g = currentList[idx].g, b = currentList[idx].b }; 
+          dlg:modify{ id = "active_lbl", text = "Active: " .. activeId }; 
+          dlg:repaint() 
+          
+          -- NEW: Automatically refresh mask when clicking a color in the palette
+          updateHighlightIfActive(app.activeSprite)
+        end
       end
     end,
     onmousemove = function(ev)
@@ -248,37 +302,24 @@ createDialog = function(savedPos)
         if l.name == "MARD_Highlight_Mask" then hlLayer = l break end
       end
       
+      -- If mask exists, clear it
       if hlLayer then
         app.transaction("Clear Highlight", function() sprite:deleteLayer(hlLayer) end)
         app.refresh()
         return
       end
       
+      -- Create mask logic
       if activeId == "-" then return app.alert("Select a base color from the palette first!") end
-      local tc = nil; local currentModeColors = getActiveColors(); for _, c in ipairs(currentModeColors) do if c.id == activeId then tc = c break end end
-      if not tc then return app.alert("Current selected color is not available in the active color mode!") end
       
       local originalLayer = app.activeLayer
-      app.transaction("Highlight Colors", function()
+      app.transaction("Create Highlight Mask", function()
         hlLayer = sprite:newLayer()
         hlLayer.name = "MARD_Highlight_Mask"
-        local cel = sprite:newCel(hlLayer, app.activeFrame)
-        local img = Image(sprite.width, sprite.height, ColorMode.RGB)
-        local flatImg = Image(sprite)
-        for it in flatImg:pixels() do
-          if app.pixelColor.rgbaA(it()) > 0 then
-            local pr, pg, pb = app.pixelColor.rgbaR(it()), app.pixelColor.rgbaG(it()), app.pixelColor.rgbaB(it())
-            if pr == tc.r and pg == tc.g and pb == tc.b then 
-              img:drawPixel(it.x, it.y, app.pixelColor.rgba(pr, pg, pb, 255))
-            else 
-              img:drawPixel(it.x, it.y, app.pixelColor.rgba(0, 0, 0, 180)) 
-            end
-          end
-        end
-        cel.image = img
       end)
       app.activeLayer = originalLayer
-      app.refresh()
+      
+      updateHighlightIfActive(sprite)
     end
   }
 
