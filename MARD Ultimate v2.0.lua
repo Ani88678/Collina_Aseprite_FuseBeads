@@ -95,7 +95,6 @@ local function updateCurrentList(sprite)
       return
     end
 
-    -- Image extraction logic
     local counts = {}
     local flatImg = Image(sprite)
     for it in flatImg:pixels() do
@@ -112,7 +111,6 @@ local function updateCurrentList(sprite)
       end
     end
 
-    -- Sorting Logic
     if sortMode == "Quantity" then
       table.sort(currentList, function(a, b) return a.count > b.count end)
     else
@@ -329,7 +327,6 @@ createDialog = function(savedPos)
       app.refresh()
       app.alert("Conversion Complete!\n\nChanged " .. changedCount .. " pixels to match standard colors.")
       
-      -- Auto refresh the Image Palette if we are in that mode
       if currentCat == "[Image Palette]" then
         local bounds = dlg.bounds; dlg:close(); createDialog({ x = bounds.x, y = bounds.y, width = bounds.width })
       end
