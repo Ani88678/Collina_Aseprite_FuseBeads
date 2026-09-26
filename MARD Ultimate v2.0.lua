@@ -1,26 +1,28 @@
 -- ============================================================================
--- MARD Palette v5.0 (English Version - Ultimate Edition)
--- Features: Image Palette Auto-Extraction, Sort by Quantity, Pixel Change Counter
+-- MARD Palette v6.1 (Pixel Count per Selected Color)
 -- ============================================================================
 local MARD = {}
 
-MARD.COLORS = {
-  { id = "A1", r = 250, g = 244, b = 200, cat = "A" }, { id = "A2", r = 255, g = 255, b = 213, cat = "A" }, { id = "A3", r = 254, g = 255, b = 139, cat = "A" }, { id = "A4", r = 251, g = 237, b = 86, cat = "A" }, { id = "A5", r = 244, g = 215, b = 56, cat = "A" }, { id = "A6", r = 254, g = 172, b = 76, cat = "A" }, { id = "A7", r = 254, g = 139, b = 76, cat = "A" }, { id = "A8", r = 255, g = 218, b = 69, cat = "A" }, { id = "A9", r = 255, g = 153, b = 91, cat = "A" }, { id = "A10", r = 247, g = 124, b = 49, cat = "A" }, { id = "A11", r = 255, g = 221, b = 153, cat = "A" }, { id = "A12", r = 254, g = 159, b = 114, cat = "A" }, { id = "A13", r = 255, g = 195, b = 101, cat = "A" }, { id = "A14", r = 253, g = 84, b = 61, cat = "A" }, { id = "A15", r = 255, g = 243, b = 101, cat = "A" }, { id = "A16", r = 255, g = 255, b = 159, cat = "A" }, { id = "A17", r = 255, g = 227, b = 110, cat = "A" }, { id = "A18", r = 254, g = 190, b = 125, cat = "A" }, { id = "A19", r = 253, g = 124, b = 114, cat = "A" }, { id = "A20", r = 255, g = 213, b = 104, cat = "A" }, { id = "A21", r = 255, g = 227, b = 149, cat = "A" }, { id = "A22", r = 244, g = 245, b = 125, cat = "A" }, { id = "A23", r = 230, g = 201, b = 183, cat = "A" }, { id = "A24", r = 247, g = 248, b = 162, cat = "A" }, { id = "A25", r = 255, g = 214, b = 125, cat = "A" }, { id = "A26", r = 255, g = 200, b = 48, cat = "A" },
-  { id = "B1", r = 230, g = 238, b = 49, cat = "B" }, { id = "B2", r = 99, g = 243, b = 71, cat = "B" }, { id = "B3", r = 158, g = 247, b = 128, cat = "B" }, { id = "B4", r = 93, g = 224, b = 53, cat = "B" }, { id = "B5", r = 53, g = 227, b = 82, cat = "B" }, { id = "B6", r = 101, g = 226, b = 166, cat = "B" }, { id = "B7", r = 61, g = 175, b = 128, cat = "B" }, { id = "B8", r = 28, g = 156, b = 79, cat = "B" }, { id = "B9", r = 39, g = 82, b = 58, cat = "B" }, { id = "B10", r = 149, g = 211, b = 194, cat = "B" }, { id = "B11", r = 93, g = 114, b = 42, cat = "B" }, { id = "B12", r = 22, g = 111, b = 65, cat = "B" }, { id = "B13", r = 202, g = 235, b = 123, cat = "B" }, { id = "B14", r = 173, g = 233, b = 70, cat = "B" }, { id = "B15", r = 46, g = 81, b = 50, cat = "B" }, { id = "B16", r = 197, g = 237, b = 156, cat = "B" }, { id = "B17", r = 155, g = 177, b = 58, cat = "B" }, { id = "B18", r = 230, g = 238, b = 73, cat = "B" }, { id = "B19", r = 36, g = 184, b = 140, cat = "B" }, { id = "B20", r = 194, g = 240, b = 204, cat = "B" }, { id = "B21", r = 21, g = 106, b = 107, cat = "B" }, { id = "B22", r = 11, g = 60, b = 67, cat = "B" }, { id = "B23", r = 48, g = 58, b = 33, cat = "B" }, { id = "B24", r = 238, g = 252, b = 165, cat = "B" }, { id = "B25", r = 78, g = 132, b = 109, cat = "B" }, { id = "B26", r = 141, g = 122, b = 53, cat = "B" }, { id = "B27", r = 204, g = 225, b = 175, cat = "B" }, { id = "B28", r = 158, g = 229, b = 185, cat = "B" }, { id = "B29", r = 197, g = 226, b = 84, cat = "B" }, { id = "B30", r = 226, g = 252, b = 177, cat = "B" }, { id = "B31", r = 176, g = 231, b = 146, cat = "B" }, { id = "B32", r = 156, g = 171, b = 90, cat = "B" },
-  { id = "C1", r = 232, g = 255, b = 231, cat = "C" }, { id = "C2", r = 169, g = 249, b = 252, cat = "C" }, { id = "C3", r = 160, g = 226, b = 251, cat = "C" }, { id = "C4", r = 65, g = 204, b = 255, cat = "C" }, { id = "C5", r = 1, g = 172, b = 235, cat = "C" }, { id = "C6", r = 80, g = 170, b = 240, cat = "C" }, { id = "C7", r = 54, g = 119, b = 210, cat = "C" }, { id = "C8", r = 15, g = 84, b = 192, cat = "C" }, { id = "C9", r = 50, g = 75, b = 202, cat = "C" }, { id = "C10", r = 62, g = 188, b = 226, cat = "C" }, { id = "C11", r = 40, g = 221, b = 222, cat = "C" }, { id = "C12", r = 28, g = 51, b = 77, cat = "C" }, { id = "C13", r = 205, g = 232, b = 255, cat = "C" }, { id = "C14", r = 213, g = 253, b = 255, cat = "C" }, { id = "C15", r = 34, g = 196, b = 198, cat = "C" }, { id = "C16", r = 21, g = 87, b = 168, cat = "C" }, { id = "C17", r = 4, g = 209, b = 246, cat = "C" }, { id = "C18", r = 29, g = 51, b = 68, cat = "C" }, { id = "C19", r = 24, g = 135, b = 162, cat = "C" }, { id = "C20", r = 23, g = 109, b = 175, cat = "C" }, { id = "C21", r = 190, g = 221, b = 255, cat = "C" }, { id = "C22", r = 103, g = 180, b = 190, cat = "C" }, { id = "C23", r = 200, g = 226, b = 255, cat = "C" }, { id = "C24", r = 124, g = 196, b = 255, cat = "C" }, { id = "C25", r = 169, g = 229, b = 229, cat = "C" }, { id = "C26", r = 60, g = 174, b = 216, cat = "C" }, { id = "C27", r = 211, g = 223, b = 250, cat = "C" }, { id = "C28", r = 187, g = 207, b = 237, cat = "C" }, { id = "C29", r = 52, g = 72, b = 142, cat = "C" },
-  { id = "D1", r = 174, g = 180, b = 242, cat = "D" }, { id = "D2", r = 133, g = 142, b = 221, cat = "D" }, { id = "D3", r = 47, g = 84, b = 175, cat = "D" }, { id = "D4", r = 24, g = 42, b = 132, cat = "D" }, { id = "D5", r = 184, g = 67, b = 197, cat = "D" }, { id = "D6", r = 172, g = 123, b = 222, cat = "D" }, { id = "D7", r = 136, g = 84, b = 179, cat = "D" }, { id = "D8", r = 226, g = 211, b = 255, cat = "D" }, { id = "D9", r = 213, g = 185, b = 248, cat = "D" }, { id = "D10", r = 54, g = 24, b = 81, cat = "D" }, { id = "D11", r = 185, g = 186, b = 225, cat = "D" }, { id = "D12", r = 222, g = 154, b = 212, cat = "D" }, { id = "D13", r = 185, g = 0, b = 149, cat = "D" }, { id = "D14", r = 139, g = 39, b = 155, cat = "D" }, { id = "D15", r = 47, g = 31, b = 144, cat = "D" }, { id = "D16", r = 227, g = 225, b = 238, cat = "D" }, { id = "D17", r = 196, g = 212, b = 246, cat = "D" }, { id = "D18", r = 164, g = 94, b = 199, cat = "D" }, { id = "D19", r = 216, g = 195, b = 215, cat = "D" }, { id = "D20", r = 156, g = 50, b = 178, cat = "D" }, { id = "D21", r = 154, g = 0, b = 155, cat = "D" }, { id = "D22", r = 51, g = 58, b = 149, cat = "D" }, { id = "D23", r = 235, g = 218, b = 252, cat = "D" }, { id = "D24", r = 119, g = 134, b = 229, cat = "D" }, { id = "D25", r = 73, g = 79, b = 199, cat = "D" }, { id = "D26", r = 223, g = 194, b = 248, cat = "D" },
-  { id = "E1", r = 253, g = 211, b = 204, cat = "E" }, { id = "E2", r = 254, g = 192, b = 223, cat = "E" }, { id = "E3", r = 255, g = 183, b = 231, cat = "E" }, { id = "E4", r = 232, g = 100, b = 158, cat = "E" }, { id = "E5", r = 245, g = 81, b = 162, cat = "E" }, { id = "E6", r = 241, g = 61, b = 116, cat = "E" }, { id = "E7", r = 198, g = 52, b = 120, cat = "E" }, { id = "E8", r = 255, g = 219, b = 233, cat = "E" }, { id = "E9", r = 233, g = 112, b = 204, cat = "E" }, { id = "E10", r = 211, g = 55, b = 147, cat = "E" }, { id = "E11", r = 252, g = 221, b = 210, cat = "E" }, { id = "E12", r = 247, g = 143, b = 195, cat = "E" }, { id = "E13", r = 181, g = 0, b = 109, cat = "E" }, { id = "E14", r = 255, g = 209, b = 186, cat = "E" }, { id = "E15", r = 248, g = 199, b = 201, cat = "E" }, { id = "E16", r = 255, g = 243, b = 235, cat = "E" }, { id = "E17", r = 255, g = 226, b = 234, cat = "E" }, { id = "E18", r = 255, g = 199, b = 219, cat = "E" }, { id = "E19", r = 254, g = 186, b = 213, cat = "E" }, { id = "E20", r = 216, g = 199, b = 209, cat = "E" }, { id = "E21", r = 189, g = 157, b = 161, cat = "E" }, { id = "E22", r = 183, g = 133, b = 161, cat = "E" }, { id = "E23", r = 147, g = 122, b = 141, cat = "E" }, { id = "E24", r = 225, g = 188, b = 232, cat = "E" },
-  { id = "F1", r = 253, g = 149, b = 123, cat = "F" }, { id = "F2", r = 252, g = 61, b = 70, cat = "F" }, { id = "F3", r = 247, g = 73, b = 65, cat = "F" }, { id = "F4", r = 252, g = 40, b = 60, cat = "F" }, { id = "F5", r = 231, g = 0, b = 47, cat = "F" }, { id = "F6", r = 148, g = 54, b = 48, cat = "F" }, { id = "F7", r = 151, g = 25, b = 55, cat = "F" }, { id = "F8", r = 188, g = 0, b = 40, cat = "F" }, { id = "F9", r = 226, g = 103, b = 122, cat = "F" }, { id = "F10", r = 138, g = 69, b = 38, cat = "F" }, { id = "F11", r = 90, g = 33, b = 33, cat = "F" }, { id = "F12", r = 253, g = 78, b = 106, cat = "F" }, { id = "F13", r = 243, g = 87, b = 68, cat = "F" }, { id = "F14", r = 255, g = 169, b = 173, cat = "F" }, { id = "F15", r = 211, g = 0, b = 34, cat = "F" }, { id = "F16", r = 254, g = 194, b = 166, cat = "F" }, { id = "F17", r = 230, g = 156, b = 121, cat = "F" }, { id = "F18", r = 211, g = 124, b = 70, cat = "F" }, { id = "F19", r = 193, g = 68, b = 74, cat = "F" }, { id = "F20", r = 205, g = 147, b = 145, cat = "F" }, { id = "F21", r = 247, g = 180, b = 198, cat = "F" }, { id = "F22", r = 253, g = 192, b = 208, cat = "F" }, { id = "F23", r = 246, g = 126, b = 102, cat = "F" }, { id = "F24", r = 230, g = 152, b = 170, cat = "F" }, { id = "F25", r = 229, g = 75, b = 79, cat = "F" },
-  { id = "G1", r = 255, g = 226, b = 206, cat = "G" }, { id = "G2", r = 255, g = 196, b = 170, cat = "G" }, { id = "G3", r = 244, g = 195, b = 165, cat = "G" }, { id = "G4", r = 225, g = 179, b = 131, cat = "G" }, { id = "G5", r = 237, g = 176, b = 69, cat = "G" }, { id = "G6", r = 233, g = 156, b = 23, cat = "G" }, { id = "G7", r = 157, g = 91, b = 62, cat = "G" }, { id = "G8", r = 117, g = 56, b = 50, cat = "G" }, { id = "G9", r = 230, g = 180, b = 131, cat = "G" }, { id = "G10", r = 217, g = 140, b = 57, cat = "G" }, { id = "G11", r = 224, g = 197, b = 147, cat = "G" }, { id = "G12", r = 255, g = 200, b = 144, cat = "G" }, { id = "G13", r = 183, g = 113, b = 74, cat = "G" }, { id = "G14", r = 141, g = 97, b = 76, cat = "G" }, { id = "G15", r = 252, g = 249, b = 224, cat = "G" }, { id = "G16", r = 242, g = 217, b = 186, cat = "G" }, { id = "G17", r = 120, g = 82, b = 75, cat = "G" }, { id = "G18", r = 255, g = 228, b = 204, cat = "G" }, { id = "G19", r = 224, g = 121, b = 53, cat = "G" }, { id = "G20", r = 169, g = 64, b = 35, cat = "G" }, { id = "G21", r = 184, g = 133, b = 88, cat = "G" },
-  { id = "H1", r = 253, g = 251, b = 255, cat = "H" }, { id = "H2", r = 254, g = 255, b = 255, cat = "H" }, { id = "H3", r = 182, g = 177, b = 186, cat = "H" }, { id = "H4", r = 137, g = 133, b = 140, cat = "H" }, { id = "H5", r = 72, g = 70, b = 78, cat = "H" }, { id = "H6", r = 47, g = 43, b = 47, cat = "H" }, { id = "H7", r = 0, g = 0, b = 0, cat = "H" }, { id = "H8", r = 231, g = 214, b = 219, cat = "H" }, { id = "H9", r = 237, g = 237, b = 237, cat = "H" }, { id = "H10", r = 238, g = 233, b = 234, cat = "H" }, { id = "H11", r = 206, g = 205, b = 213, cat = "H" }, { id = "H12", r = 255, g = 245, b = 237, cat = "H" }, { id = "H13", r = 245, g = 236, b = 210, cat = "H" }, { id = "H14", r = 207, g = 215, b = 211, cat = "H" }, { id = "H15", r = 152, g = 166, b = 168, cat = "H" }, { id = "H16", r = 29, g = 20, b = 20, cat = "H" }, { id = "H17", r = 241, g = 237, b = 237, cat = "H" }, { id = "H18", r = 255, g = 253, b = 240, cat = "H" }, { id = "H19", r = 246, g = 239, b = 226, cat = "H" }, { id = "H20", r = 148, g = 159, b = 163, cat = "H" }, { id = "H21", r = 255, g = 251, b = 225, cat = "H" }, { id = "H22", r = 202, g = 202, b = 212, cat = "H" }, { id = "H23", r = 154, g = 157, b = 148, cat = "H" },
-  { id = "M1", r = 188, g = 198, b = 184, cat = "M" }, { id = "M2", r = 138, g = 163, b = 134, cat = "M" }, { id = "M3", r = 105, g = 125, b = 128, cat = "M" }, { id = "M4", r = 227, g = 210, b = 188, cat = "M" }, { id = "M5", r = 208, g = 204, b = 170, cat = "M" }, { id = "M6", r = 176, g = 167, b = 130, cat = "M" }, { id = "M7", r = 180, g = 164, b = 151, cat = "M" }, { id = "M8", r = 179, g = 130, b = 129, cat = "M" }, { id = "M9", r = 165, g = 135, b = 103, cat = "M" }, { id = "M10", r = 197, g = 178, b = 188, cat = "M" }, { id = "M11", r = 159, g = 117, b = 148, cat = "M" }, { id = "M12", r = 100, g = 71, b = 73, cat = "M" }, { id = "M13", r = 209, g = 144, b = 102, cat = "M" }, { id = "M14", r = 199, g = 115, b = 98, cat = "M" }, { id = "M15", r = 117, g = 125, b = 120, cat = "M" },
-  { id = "P1", r = 252, g = 247, b = 248, cat = "P" }, { id = "P2", r = 176, g = 169, b = 172, cat = "P" }, { id = "P3", r = 175, g = 220, b = 171, cat = "P" }, { id = "P4", r = 254, g = 164, b = 159, cat = "P" }, { id = "P5", r = 238, g = 140, b = 62, cat = "P" }, { id = "P6", r = 95, g = 208, b = 167, cat = "P" }, { id = "P7", r = 235, g = 146, b = 112, cat = "P" }, { id = "P8", r = 240, g = 217, b = 88, cat = "P" }, { id = "P9", r = 217, g = 217, b = 217, cat = "P" }, { id = "P10", r = 217, g = 199, b = 234, cat = "P" }, { id = "P11", r = 243, g = 236, b = 201, cat = "P" }, { id = "P12", r = 230, g = 238, b = 201, cat = "P" }, { id = "P13", r = 170, g = 203, b = 239, cat = "P" }, { id = "P14", r = 51, g = 118, b = 128, cat = "P" }, { id = "P15", r = 102, g = 133, b = 117, cat = "P" }, { id = "P16", r = 254, g = 191, b = 69, cat = "P" }, { id = "P17", r = 254, g = 163, b = 36, cat = "P" }, { id = "P18", r = 254, g = 184, b = 159, cat = "P" }, { id = "P19", r = 255, g = 254, b = 236, cat = "P" }, { id = "P20", r = 254, g = 190, b = 207, cat = "P" }, { id = "P21", r = 236, g = 190, b = 191, cat = "P" }, { id = "P22", r = 228, g = 168, b = 159, cat = "P" }, { id = "P23", r = 165, g = 98, b = 104, cat = "P" },
-  { id = "R1", r = 213, g = 13, b = 33, cat = "R" }, { id = "R2", r = 249, g = 47, b = 131, cat = "R" }, { id = "R3", r = 253, g = 131, b = 36, cat = "R" }, { id = "R4", r = 248, g = 236, b = 49, cat = "R" }, { id = "R5", r = 53, g = 199, b = 91, cat = "R" }, { id = "R6", r = 35, g = 136, b = 145, cat = "R" }, { id = "R7", r = 25, g = 119, b = 157, cat = "R" }, { id = "R8", r = 26, g = 96, b = 195, cat = "R" }, { id = "R9", r = 154, g = 86, b = 180, cat = "R" }, { id = "R10", r = 255, g = 219, b = 76, cat = "R" }, { id = "R11", r = 255, g = 235, b = 250, cat = "R" }, { id = "R12", r = 216, g = 213, b = 206, cat = "R" }, { id = "R13", r = 85, g = 81, b = 76, cat = "R" }, { id = "R14", r = 159, g = 228, b = 223, cat = "R" }, { id = "R15", r = 119, g = 206, b = 233, cat = "R" }, { id = "R16", r = 62, g = 207, b = 202, cat = "R" }, { id = "R17", r = 74, g = 134, b = 122, cat = "R" }, { id = "R18", r = 127, g = 205, b = 157, cat = "R" }, { id = "R19", r = 205, g = 229, b = 93, cat = "R" }, { id = "R20", r = 232, g = 199, b = 180, cat = "R" }, { id = "R21", r = 173, g = 111, b = 60, cat = "R" }, { id = "R22", r = 108, g = 55, b = 47, cat = "R" }, { id = "R23", r = 254, g = 184, b = 114, cat = "R" }, { id = "R24", r = 243, g = 193, b = 192, cat = "R" }, { id = "R25", r = 201, g = 103, b = 94, cat = "R" }, { id = "R26", r = 210, g = 147, b = 190, cat = "R" }, { id = "R27", r = 234, g = 140, b = 177, cat = "R" }, { id = "R28", r = 156, g = 135, b = 214, cat = "R" },
-  { id = "T1", r = 255, g = 255, b = 255, cat = "T" }
+local RAW_DATA = {
+  {"A1",250,244,200,"A"},{"A2",255,255,213,"A"},{"A3",254,255,139,"A"},{"A4",251,237,86,"A"},{"A5",244,215,56,"A"},{"A6",254,172,76,"A"},{"A7",254,139,76,"A"},{"A8",255,218,69,"A"},{"A9",255,153,91,"A"},{"A10",247,124,49,"A"},{"A11",255,221,153,"A"},{"A12",254,159,114,"A"},{"A13",255,195,101,"A"},{"A14",253,84,61,"A"},{"A15",255,243,101,"A"},{"A16",255,255,159,"A"},{"A17",255,227,110,"A"},{"A18",254,190,125,"A"},{"A19",253,124,114,"A"},{"A20",255,213,104,"A"},{"A21",255,227,149,"A"},{"A22",244,245,125,"A"},{"A23",230,201,183,"A"},{"A24",247,248,162,"A"},{"A25",255,214,125,"A"},{"A26",255,200,48,"A"},
+  {"B1",230,238,49,"B"},{"B2",99,243,71,"B"},{"B3",158,247,128,"B"},{"B4",93,224,53,"B"},{"B5",53,227,82,"B"},{"B6",101,226,166,"B"},{"B7",61,175,128,"B"},{"B8",28,156,79,"B"},{"B9",39,82,58,"B"},{"B10",149,211,194,"B"},{"B11",93,114,42,"B"},{"B12",22,111,65,"B"},{"B13",202,235,123,"B"},{"B14",173,233,70,"B"},{"B15",46,81,50,"B"},{"B16",197,237,156,"B"},{"B17",155,177,58,"B"},{"B18",230,238,73,"B"},{"B19",36,184,140,"B"},{"B20",194,240,204,"B"},{"B21",21,106,107,"B"},{"B22",11,60,67,"B"},{"B23",48,58,33,"B"},{"B24",238,252,165,"B"},{"B25",78,132,109,"B"},{"B26",141,122,53,"B"},{"B27",204,225,175,"B"},{"B28",158,229,185,"B"},{"B29",197,226,84,"B"},{"B30",226,252,177,"B"},{"B31",176,231,146,"B"},{"B32",156,171,90,"B"},
+  {"C1",232,255,231,"C"},{"C2",169,249,252,"C"},{"C3",160,226,251,"C"},{"C4",65,204,255,"C"},{"C5",1,172,235,"C"},{"C6",80,170,240,"C"},{"C7",54,119,210,"C"},{"C8",15,84,192,"C"},{"C9",50,75,202,"C"},{"C10",62,188,226,"C"},{"C11",40,221,222,"C"},{"C12",28,51,77,"C"},{"C13",205,232,255,"C"},{"C14",213,253,255,"C"},{"C15",34,196,198,"C"},{"C16",21,87,168,"C"},{"C17",4,209,246,"C"},{"C18",29,51,68,"C"},{"C19",24,135,162,"C"},{"C20",23,109,175,"C"},{"C21",190,221,255,"C"},{"C22",103,180,190,"C"},{"C23",200,226,255,"C"},{"C24",124,196,255,"C"},{"C25",169,229,229,"C"},{"C26",60,174,216,"C"},{"C27",211,223,250,"C"},{"C28",187,207,237,"C"},{"C29",52,72,142,"C"},
+  {"D1",174,180,242,"D"},{"D2",133,142,221,"D"},{"D3",47,84,175,"D"},{"D4",24,42,132,"D"},{"D5",184,67,197,"D"},{"D6",172,123,222,"D"},{"D7",136,84,179,"D"},{"D8",226,211,255,"D"},{"D9",213,185,248,"D"},{"D10",54,24,81,"D"},{"D11",185,186,225,"D"},{"D12",222,154,212,"D"},{"D13",185,0,149,"D"},{"D14",139,39,155,"D"},{"D15",47,31,144,"D"},{"D16",227,225,238,"D"},{"D17",196,212,246,"D"},{"D18",164,94,199,"D"},{"D19",216,195,215,"D"},{"D20",156,50,178,"D"},{"D21",154,0,155,"D"},{"D22",51,58,149,"D"},{"D23",235,218,252,"D"},{"D24",119,134,229,"D"},{"D25",73,79,199,"D"},{"D26",223,194,248,"D"},
+  {"E1",253,211,204,"E"},{"E2",254,192,223,"E"},{"E3",255,183,231,"E"},{"E4",232,100,158,"E"},{"E5",245,81,162,"E"},{"E6",241,61,116,"E"},{"E7",198,52,120,"E"},{"E8",255,219,233,"E"},{"E9",233,112,204,"E"},{"E10",211,55,147,"E"},{"E11",252,221,210,"E"},{"E12",247,143,195,"E"},{"E13",181,0,109,"E"},{"E14",255,209,186,"E"},{"E15",248,199,201,"E"},{"E16",255,243,235,"E"},{"E17",255,226,234,"E"},{"E18",255,199,219,"E"},{"E19",254,186,213,"E"},{"E20",216,199,209,"E"},{"E21",189,157,161,"E"},{"E22",183,133,161,"E"},{"E23",147,122,141,"E"},{"E24",225,188,232,"E"},
+  {"F1",253,149,123,"F"},{"F2",252,61,70,"F"},{"F3",247,73,65,"F"},{"F4",252,40,60,"F"},{"F5",231,0,47,"F"},{"F6",148,54,48,"F"},{"F7",151,25,55,"F"},{"F8",188,0,40,"F"},{"F9",226,103,122,"F"},{"F10",138,69,38,"F"},{"F11",90,33,33,"F"},{"F12",253,78,106,"F"},{"F13",243,87,68,"F"},{"F14",255,169,173,"F"},{"F15",211,0,34,"F"},{"F16",254,194,166,"F"},{"F17",230,156,121,"F"},{"F18",211,124,70,"F"},{"F19",193,68,74,"F"},{"F20",205,147,145,"F"},{"F21",247,180,198,"F"},{"F22",253,192,208,"F"},{"F23",246,126,102,"F"},{"F24",230,152,170,"F"},{"F25",229,75,79,"F"},
+  {"G1",255,226,206,"G"},{"G2",255,196,170,"G"},{"G3",244,195,165,"G"},{"G4",225,179,131,"G"},{"G5",237,176,69,"G"},{"G6",233,156,23,"G"},{"G7",157,91,62,"G"},{"G8",117,56,50,"G"},{"G9",230,180,131,"G"},{"G10",217,140,57,"G"},{"G11",224,197,147,"G"},{"G12",255,200,144,"G"},{"G13",183,113,74,"G"},{"G14",141,97,76,"G"},{"G15",252,249,224,"G"},{"G16",242,217,186,"G"},{"G17",120,82,75,"G"},{"G18",255,228,204,"G"},{"G19",224,121,53,"G"},{"G20",169,64,35,"G"},{"G21",184,133,88,"G"},
+  {"H1",253,251,255,"H"},{"H2",254,255,255,"H"},{"H3",182,177,186,"H"},{"H4",137,133,140,"H"},{"H5",72,70,78,"H"},{"H6",47,43,47,"H"},{"H7",0,0,0,"H"},{"H8",231,214,219,"H"},{"H9",237,237,237,"H"},{"H10",238,233,234,"H"},{"H11",206,205,213,"H"},{"H12",255,245,237,"H"},{"H13",245,236,210,"H"},{"H14",207,215,211,"H"},{"H15",152,166,168,"H"},{"H16",29,20,20,"H"},{"H17",241,237,237,"H"},{"H18",255,253,240,"H"},{"H19",246,239,226,"H"},{"H20",148,159,163,"H"},{"H21",255,251,225,"H"},{"H22",202,202,212,"H"},{"H23",154,157,148,"H"},
+  {"M1",188,198,184,"M"},{"M2",138,163,134,"M"},{"M3",105,125,128,"M"},{"M4",227,210,188,"M"},{"M5",208,204,170,"M"},{"M6",176,167,130,"M"},{"M7",180,164,151,"M"},{"M8",179,130,129,"M"},{"M9",165,135,103,"M"},{"M10",197,178,188,"M"},{"M11",159,117,148,"M"},{"M12",100,71,73,"M"},{"M13",209,144,102,"M"},{"M14",199,115,98,"M"},{"M15",117,125,120,"M"},
+  {"P1",252,247,248,"P"},{"P2",176,169,172,"P"},{"P3",175,220,171,"P"},{"P4",254,164,159,"P"},{"P5",238,140,62,"P"},{"P6",95,208,167,"P"},{"P7",235,146,112,"P"},{"P8",240,217,88,"P"},{"P9",217,217,217,"P"},{"P10",217,199,234,"P"},{"P11",243,236,201,"P"},{"P12",230,238,201,"P"},{"P13",170,203,239,"P"},{"P14",51,118,128,"P"},{"P15",102,133,117,"P"},{"P16",254,191,69,"P"},{"P17",254,163,36,"P"},{"P18",254,184,159,"P"},{"P19",255,254,236,"P"},{"P20",254,190,207,"P"},{"P21",236,190,191,"P"},{"P22",228,168,159,"P"},{"P23",165,98,104,"P"},
+  {"R1",213,13,33,"R"},{"R2",249,47,131,"R"},{"R3",253,131,36,"R"},{"R4",248,236,49,"R"},{"R5",53,199,91,"R"},{"R6",35,136,145,"R"},{"R7",25,119,157,"R"},{"R8",26,96,195,"R"},{"R9",154,86,180,"R"},{"R10",255,219,76,"R"},{"R11",255,235,250,"R"},{"R12",216,213,206,"R"},{"R13",85,81,76,"R"},{"R14",159,228,223,"R"},{"R15",119,206,233,"R"},{"R16",62,207,202,"R"},{"R17",74,134,122,"R"},{"R18",127,205,157,"R"},{"R19",205,229,93,"R"},{"R20",232,199,180,"R"},{"R21",173,111,60,"R"},{"R22",108,55,47,"R"},{"R23",254,184,114,"R"},{"R24",243,193,192,"R"},{"R25",201,103,94,"R"},{"R26",210,147,190,"R"},{"R27",234,140,177,"R"},{"R28",156,135,214,"R"},
+  {"T1",255,255,255,"T"}
 }
 
+MARD.COLORS = {}
+for _, v in ipairs(RAW_DATA) do table.insert(MARD.COLORS, { id=v[1], r=v[2], g=v[3], b=v[4], cat=v[5] }) end
+
 MARD.FONT_3X5 = {
-  ['0'] = { "111", "101", "101", "101", "111" }, ['1'] = { "010", "110", "010", "010", "111" }, ['2'] = { "111", "001", "111", "100", "111" }, ['3'] = { "111", "001", "111", "001", "111" }, ['4'] = { "101", "101", "111", "001", "001" }, ['5'] = { "111", "100", "111", "001", "111" }, ['6'] = { "111", "100", "111", "101", "111" }, ['7'] = { "111", "001", "010", "010", "010" }, ['8'] = { "111", "101", "111", "101", "111" }, ['9'] = { "111", "101", "111", "001", "111" }, ['A'] = { "010", "101", "111", "101", "101" }, ['B'] = { "110", "101", "110", "101", "110" }, ['C'] = { "011", "100", "100", "100", "011" }, ['D'] = { "110", "101", "101", "101", "110" }, ['E'] = { "111", "100", "110", "100", "111" }, ['F'] = { "111", "100", "110", "100", "100" }, ['G'] = { "011", "100", "101", "101", "011" }, ['H'] = { "101", "101", "111", "101", "101" }, ['M'] = { "101", "111", "101", "101", "101" }, ['P'] = { "111", "101", "111", "100", "100" }, ['R'] = { "110", "101", "110", "101", "101" }, ['T'] = { "111", "010", "010", "010", "010" },
+  ['0']={"111","101","101","101","111"},['1']={"010","110","010","010","111"},['2']={"111","001","111","100","111"},['3']={"111","001","111","001","111"},['4']={"101","101","111","001","001"},['5']={"111","100","111","001","111"},['6']={"111","100","111","101","111"},['7']={"111","001","010","010","010"},['8']={"111","101","111","101","111"},['9']={"111","101","111","001","111"},['A']={"010","101","111","101","101"},['B']={"110","101","110","101","110"},['C']={"011","100","100","100","011"},['D']={"110","101","101","101","110"},['E']={"111","100","110","100","111"},['F']={"111","100","110","100","100"},['G']={"011","100","101","101","011"},['H']={"101","101","111","101","101"},['M']={"101","111","101","101","101"},['P']={"111","101","111","100","100"},['R']={"110","101","110","101","101"},['T']={"111","010","010","010","010"},['-']={"000","000","111","000","000"},['X']={"101","101","010","101","101"}
 }
 
 local useFullMode = false
@@ -34,9 +36,17 @@ local isDragging = false
 local dragStartMouseY = 0
 local dragStartScrollY = 0
 
-local COLS = 5; local CELL_SIZE = 19; local GAP = 1; local MARGIN = 3; 
-local SCROLL_TRACK_W = 6; local SCROLL_BAR_W = 4; local MAX_VIEWPORT_H = 220; 
-local FIXED_VIEWPORT_W = MARGIN * 2 + COLS * CELL_SIZE + (COLS - 1) * GAP + SCROLL_TRACK_W + 2
+local globalCounts = {}
+local uniqueColorsUsed = 0
+
+local COLS_GRID = 5
+local CELL_SIZE = 19
+local GAP = 1
+local MARGIN = 3
+local SCROLL_TRACK_W = 6
+local SCROLL_BAR_W = 4
+local MAX_VIEWPORT_H = 220
+local FIXED_VIEWPORT_W = MARGIN * 2 + COLS_GRID * CELL_SIZE + (COLS_GRID - 1) * GAP + SCROLL_TRACK_W + 2
 
 local function getActiveColors()
   local list = {}
@@ -82,37 +92,47 @@ function MARD.drawPixelText(ctxOrImg, text, startX, startY, color, isCanvas)
   end
 end
 
+-- Scan the active sprite to get the exact pixel counts for every color
+local function scanImageCounts(sprite)
+  globalCounts = {}
+  uniqueColorsUsed = 0
+  if not sprite then return end
+  
+  local baseColors = getActiveColors()
+  local flatImg = Image(sprite)
+  for it in flatImg:pixels() do
+    if app.pixelColor.rgbaA(it()) > 0 then
+      local pr, pg, pb = app.pixelColor.rgbaR(it()), app.pixelColor.rgbaG(it()), app.pixelColor.rgbaB(it())
+      local nc = MARD.findNearestColor(pr, pg, pb, baseColors)
+      if not globalCounts[nc.id] then
+        globalCounts[nc.id] = 1
+        uniqueColorsUsed = uniqueColorsUsed + 1
+      else
+        globalCounts[nc.id] = globalCounts[nc.id] + 1
+      end
+    end
+  end
+end
+
 local currentList = {}
 local function updateCurrentList(sprite)
+  scanImageCounts(sprite)
   local baseColors = getActiveColors()
   currentList = {}
   
   if currentCat == "[Image Palette]" then
     if not sprite then
-      app.alert("Please open an image to extract its palette!")
       currentCat = "All"
-      for _, item in ipairs(baseColors) do table.insert(currentList, {id=item.id, r=item.r, g=item.g, b=item.b, cat=item.cat}) end
+      for _, item in ipairs(baseColors) do table.insert(currentList, {id=item.id, r=item.r, g=item.g, b=item.b, cat=item.cat, count=0}) end
       return
     end
 
-    -- Image extraction logic
-    local counts = {}
-    local flatImg = Image(sprite)
-    for it in flatImg:pixels() do
-      if app.pixelColor.rgbaA(it()) > 0 then
-        local pr, pg, pb = app.pixelColor.rgbaR(it()), app.pixelColor.rgbaG(it()), app.pixelColor.rgbaB(it())
-        local nc = MARD.findNearestColor(pr, pg, pb, baseColors)
-        counts[nc.id] = (counts[nc.id] or 0) + 1
-      end
-    end
-
     for _, c in ipairs(baseColors) do
-      if counts[c.id] then
-        table.insert(currentList, { id=c.id, r=c.r, g=c.g, b=c.b, cat=c.cat, count=counts[c.id] })
+      if globalCounts[c.id] and globalCounts[c.id] > 0 then
+        table.insert(currentList, { id=c.id, r=c.r, g=c.g, b=c.b, cat=c.cat, count=globalCounts[c.id] })
       end
     end
 
-    -- Sorting Logic
     if sortMode == "Quantity" then
       table.sort(currentList, function(a, b) return a.count > b.count end)
     else
@@ -120,21 +140,23 @@ local function updateCurrentList(sprite)
         local c1, n1 = a.id:match("(%a+)(%d+)")
         local c2, n2 = b.id:match("(%a+)(%d+)")
         if c1 == c2 then return tonumber(n1) < tonumber(n2) end
-        return c1 < c2
+        return (c1 or "") < (c2 or "")
       end)
     end
-    
   else
     for _, item in ipairs(baseColors) do
       if currentCat == "All" or item.cat == currentCat then
-        table.insert(currentList, { id=item.id, r=item.r, g=item.g, b=item.b, cat=item.cat })
+        local cnt = globalCounts[item.id] or 0
+        table.insert(currentList, { id=item.id, r=item.r, g=item.g, b=item.b, cat=item.cat, count=cnt })
       end
     end
   end
 end
 
-local function getTotalRows() return math.max(1, math.ceil(#currentList / COLS)) end
-local function getTotalContentH() local r = getTotalRows(); return MARGIN * 2 + r * CELL_SIZE + (r - 1) * GAP end
+local function isListView() return currentCat == "[Image Palette]" end
+local function getActiveCols() return isListView() and 1 or COLS_GRID end
+local function getTotalRows() return math.max(1, math.ceil(#currentList / getActiveCols())) end
+local function getTotalContentH() return MARGIN * 2 + getTotalRows() * CELL_SIZE + (getTotalRows() - 1) * GAP end
 local function getActiveViewportH() return math.min(getTotalContentH(), MAX_VIEWPORT_H) end
 local function needsScroll() return getTotalContentH() > getActiveViewportH() end
 local function getMaxScroll() return math.max(0, getTotalContentH() - getActiveViewportH()) end
@@ -152,18 +174,26 @@ local function getIndexAt(x, y)
   if needsScroll() and x > FIXED_VIEWPORT_W - SCROLL_TRACK_W - 2 then return nil end
   local vY = y + scrollY - MARGIN; local vX = x - MARGIN
   local col = math.floor(vX / (CELL_SIZE + GAP)); local row = math.floor(vY / (CELL_SIZE + GAP))
-  if col >= 0 and col < COLS and row >= 0 and row < getTotalRows() then
+  
+  if isListView() then
+    if row >= 0 and row < #currentList then return row + 1 end
+    return nil
+  end
+
+  if col >= 0 and col < COLS_GRID and row >= 0 and row < getTotalRows() then
     if vX % (CELL_SIZE + GAP) < CELL_SIZE and vY % (CELL_SIZE + GAP) < CELL_SIZE then
-      local idx = row * COLS + col + 1; if idx <= #currentList then return idx end
+      local idx = row * COLS_GRID + col + 1; if idx <= #currentList then return idx end
     end
   end
   return nil
 end
 
-local function getFormatStr(idx)
+-- Clear format showing exact pixel count of this color on the canvas
+local function getPixelCountStr(idx)
   if not idx or not currentList[idx] then return "-" end
   local c = currentList[idx]
-  return c.count and (c.id .. " (" .. c.count .. ")") or c.id
+  local cnt = globalCounts[c.id] or c.count or 0
+  return c.id .. " (" .. cnt .. " PX)"
 end
 
 local function updateHighlightIfActive(sprite)
@@ -207,7 +237,7 @@ local createDialog
 createDialog = function(savedPos)
   updateCurrentList(app.activeSprite)
   
-  local dlg = Dialog{ title = "MARD Palette v5.0" }
+  local dlg = Dialog{ title = "MARD Palette v6.1" }
   
   dlg:check{
     id = "full_mode",
@@ -225,8 +255,7 @@ createDialog = function(savedPos)
   dlg:combobox{
     id = "cat_filter", label = "Source:", options = getCatOptions(), option = currentCat,
     onchange = function()
-      local nextCat = dlg.data.cat_filter; if nextCat == currentCat then return end
-      currentCat = nextCat
+      currentCat = dlg.data.cat_filter
       scrollY = 0; selectedIndex = nil; hoveredIndex = nil
       local bounds = dlg.bounds; dlg:close(); createDialog({ x = bounds.x, y = bounds.y, width = bounds.width })
     end
@@ -248,16 +277,32 @@ createDialog = function(savedPos)
     onpaint = function(ev)
       local ctx = ev.context; local viewH = getActiveViewportH()
       ctx.color = Color{ r = 28, g = 28, b = 32 }; ctx:fillRect(Rectangle(0, 0, ev.width, ev.height))
+      
       for i, item in ipairs(currentList) do
-        local col = (i - 1) % COLS; local row = math.floor((i - 1) / COLS)
-        local x = MARGIN + col * (CELL_SIZE + GAP); local y = MARGIN + row * (CELL_SIZE + GAP) - scrollY
+        local isList = isListView()
+        local col = isList and 0 or ((i - 1) % COLS_GRID)
+        local row = isList and (i - 1) or math.floor((i - 1) / COLS_GRID)
+        local x = MARGIN + col * (CELL_SIZE + GAP)
+        local y = MARGIN + row * (CELL_SIZE + GAP) - scrollY
+
         if y + CELL_SIZE >= 0 and y <= viewH then
-          ctx.color = Color{ r = item.r, g = item.g, b = item.b }; ctx:fillRect(Rectangle(x, y, CELL_SIZE, CELL_SIZE))
+          ctx.color = Color{ r = item.r, g = item.g, b = item.b }
+          ctx:fillRect(Rectangle(x, y, CELL_SIZE, CELL_SIZE))
+          
           ctx.color = (i == selectedIndex) and Color{ r = 255, g = 255, b = 255 } or ((i == hoveredIndex) and Color{ r = 195, g = 195, b = 205 } or Color{ r = 38, g = 38, b = 44 })
           ctx:strokeRect(Rectangle(x, y, CELL_SIZE, CELL_SIZE))
-          MARD.drawPixelText(ctx, item.id, x + math.floor((CELL_SIZE - (#item.id * 4 - 1)) / 2), y + math.floor((CELL_SIZE - 5) / 2), getContrastColor(item.r, item.g, item.b), true)
+          
+          if isList then
+            MARD.drawPixelText(ctx, item.id, x + math.floor((CELL_SIZE - (#item.id * 4 - 1)) / 2), y + math.floor((CELL_SIZE - 5) / 2), getContrastColor(item.r, item.g, item.b), true)
+            local countText = "- " .. tostring(item.count) .. " PX"
+            local textColor = (item.count == 1) and Color{ r = 255, g = 60, b = 60 } or Color{ r = 200, g = 205, b = 215 }
+            MARD.drawPixelText(ctx, countText, x + CELL_SIZE + 6, y + math.floor((CELL_SIZE - 5) / 2), textColor, true)
+          else
+            MARD.drawPixelText(ctx, item.id, x + math.floor((CELL_SIZE - (#item.id * 4 - 1)) / 2), y + math.floor((CELL_SIZE - 5) / 2), getContrastColor(item.r, item.g, item.b), true)
+          end
         end
       end
+      
       if needsScroll() then
         ctx.color = Color{ r = 18, g = 18, b = 22 }; ctx:fillRect(Rectangle(FIXED_VIEWPORT_W - SCROLL_TRACK_W - 1, 0, SCROLL_TRACK_W, viewH))
         local tx, ty, tw, th = getThumbGeometry()
@@ -278,7 +323,7 @@ createDialog = function(savedPos)
           selectedIndex = idx; 
           activeId = currentList[idx].id; 
           app.fgColor = Color{ r = currentList[idx].r, g = currentList[idx].g, b = currentList[idx].b }; 
-          dlg:modify{ id = "info_lbl", text = "Sel: " .. getFormatStr(selectedIndex) .. "  |  Hov: " .. getFormatStr(selectedIndex) }; 
+          dlg:modify{ id = "info_lbl", text = "Sel: " .. getPixelCountStr(selectedIndex) .. "  |  Hov: " .. getPixelCountStr(selectedIndex) }; 
           dlg:repaint() 
           updateHighlightIfActive(app.activeSprite)
         end
@@ -289,7 +334,7 @@ createDialog = function(savedPos)
       local idx = getIndexAt(ev.x, ev.y)
       if idx ~= hoveredIndex then 
         hoveredIndex = idx
-        dlg:modify{ id = "info_lbl", text = "Sel: " .. getFormatStr(selectedIndex) .. "  |  Hov: " .. getFormatStr(idx) }
+        dlg:modify{ id = "info_lbl", text = "Sel: " .. getPixelCountStr(selectedIndex) .. "  |  Hov: " .. getPixelCountStr(idx) }
         dlg:repaint() 
       end
     end,
@@ -297,8 +342,8 @@ createDialog = function(savedPos)
   }
 
   dlg:separator()
-  dlg:label{ id = "stats_lbl", text = (currentCat == "[Image Palette]") and ("Colors Used: " .. #currentList) or ("Total Colors: " .. #currentList) }
-  dlg:label{ id = "info_lbl", text = "Sel: " .. getFormatStr(selectedIndex) .. "  |  Hov: -" }
+  dlg:label{ id = "stats_lbl", text = "In-Use Colors: " .. uniqueColorsUsed }
+  dlg:label{ id = "info_lbl", text = "Sel: " .. getPixelCountStr(selectedIndex) .. "  |  Hov: -" }
   
   dlg:separator{ text = "Tools" }
   
@@ -329,10 +374,7 @@ createDialog = function(savedPos)
       app.refresh()
       app.alert("Conversion Complete!\n\nChanged " .. changedCount .. " pixels to match standard colors.")
       
-      -- Auto refresh the Image Palette if we are in that mode
-      if currentCat == "[Image Palette]" then
-        local bounds = dlg.bounds; dlg:close(); createDialog({ x = bounds.x, y = bounds.y, width = bounds.width })
-      end
+      local bounds = dlg.bounds; dlg:close(); createDialog({ x = bounds.x, y = bounds.y, width = bounds.width })
     end
   }
   
