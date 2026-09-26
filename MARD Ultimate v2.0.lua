@@ -1,6 +1,6 @@
 -- ============================================================================
--- MARD Palette v4.2 (English Version - UI Optimized)
--- Features: 221/273 Mode, Convert, Dynamic Highlight, Label Pixels, Sleek UI
+-- MARD Palette v5.0 (English Version - Ultimate Edition)
+-- Features: Image Palette Auto-Extraction, Sort by Quantity, Pixel Change Counter
 -- ============================================================================
 local MARD = {}
 
@@ -25,6 +25,7 @@ MARD.FONT_3X5 = {
 
 local useFullMode = false
 local currentCat = "All"
+local sortMode = "ID"
 local selectedIndex = nil
 local hoveredIndex = nil
 local activeId = "-"
@@ -46,7 +47,9 @@ local function getActiveColors()
 end
 
 local function getCatOptions()
-  return useFullMode and { "All", "A", "B", "C", "D", "E", "F", "G", "H", "M", "P", "R", "T" } or { "All", "A", "B", "C", "D", "E", "F", "G", "H", "M" }
+  local opts = useFullMode and { "All", "A", "B", "C", "D", "E", "F", "G", "H", "M", "P", "R", "T" } or { "All", "A", "B", "C", "D", "E", "F", "G", "H", "M" }
+  table.insert(opts, "[Image Palette]")
+  return opts
 end
 
 function MARD.findNearestColor(r, g, b, colorList)
@@ -80,11 +83,53 @@ function MARD.drawPixelText(ctxOrImg, text, startX, startY, color, isCanvas)
 end
 
 local currentList = {}
-local function updateCurrentList()
+local function updateCurrentList(sprite)
   local baseColors = getActiveColors()
   currentList = {}
-  if currentCat == "All" then currentList = baseColors else
-    for _, item in ipairs(baseColors) do if item.cat == currentCat then table.insert(currentList, item) end end
+  
+  if currentCat == "[Image Palette]" then
+    if not sprite then
+      app.alert("Please open an image to extract its palette!")
+      currentCat = "All"
+      for _, item in ipairs(baseColors) do table.insert(currentList, {id=item.id, r=item.r, g=item.g, b=item.b, cat=item.cat}) end
+      return
+    end
+
+    -- Image extraction logic
+    local counts = {}
+    local flatImg = Image(sprite)
+    for it in flatImg:pixels() do
+      if app.pixelColor.rgbaA(it()) > 0 then
+        local pr, pg, pb = app.pixelColor.rgbaR(it()), app.pixelColor.rgbaG(it()), app.pixelColor.rgbaB(it())
+        local nc = MARD.findNearestColor(pr, pg, pb, baseColors)
+        counts[nc.id] = (counts[nc.id] or 0) + 1
+      end
+    end
+
+    for _, c in ipairs(baseColors) do
+      if counts[c.id] then
+        table.insert(currentList, { id=c.id, r=c.r, g=c.g, b=c.b, cat=c.cat, count=counts[c.id] })
+      end
+    end
+
+    -- Sorting Logic
+    if sortMode == "Quantity" then
+      table.sort(currentList, function(a, b) return a.count > b.count end)
+    else
+      table.sort(currentList, function(a, b)
+        local c1, n1 = a.id:match("(%a+)(%d+)")
+        local c2, n2 = b.id:match("(%a+)(%d+)")
+        if c1 == c2 then return tonumber(n1) < tonumber(n2) end
+        return c1 < c2
+      end)
+    end
+    
+  else
+    for _, item in ipairs(baseColors) do
+      if currentCat == "All" or item.cat == currentCat then
+        table.insert(currentList, { id=item.id, r=item.r, g=item.g, b=item.b, cat=item.cat })
+      end
+    end
   end
 end
 
@@ -113,6 +158,12 @@ local function getIndexAt(x, y)
     end
   end
   return nil
+end
+
+local function getFormatStr(idx)
+  if not idx or not currentList[idx] then return "-" end
+  local c = currentList[idx]
+  return c.count and (c.id .. " (" .. c.count .. ")") or c.id
 end
 
 local function updateHighlightIfActive(sprite)
@@ -154,11 +205,10 @@ end
 
 local createDialog
 createDialog = function(savedPos)
-  updateCurrentList()
+  updateCurrentList(app.activeSprite)
   
-  local dlg = Dialog{ title = "MARD Palette v4.2" }
+  local dlg = Dialog{ title = "MARD Palette v5.0" }
   
-  -- Top UI
   dlg:check{
     id = "full_mode",
     text = "Full Palette (273)",
@@ -173,7 +223,7 @@ createDialog = function(savedPos)
   
   dlg:newrow()
   dlg:combobox{
-    id = "cat_filter", options = getCatOptions(), option = currentCat,
+    id = "cat_filter", label = "Source:", options = getCatOptions(), option = currentCat,
     onchange = function()
       local nextCat = dlg.data.cat_filter; if nextCat == currentCat then return end
       currentCat = nextCat
@@ -181,8 +231,17 @@ createDialog = function(savedPos)
       local bounds = dlg.bounds; dlg:close(); createDialog({ x = bounds.x, y = bounds.y, width = bounds.width })
     end
   }
+  
+  dlg:combobox{
+    id = "sort_mode", label = "Sort:", options = {"ID", "Quantity"}, option = sortMode,
+    onchange = function()
+      sortMode = dlg.data.sort_mode
+      if currentCat == "[Image Palette]" then
+        local bounds = dlg.bounds; dlg:close(); createDialog({ x = bounds.x, y = bounds.y, width = bounds.width })
+      end
+    end
+  }
 
-  -- Canvas
   dlg:newrow()
   dlg:canvas{
     id = "palette_canvas", width = FIXED_VIEWPORT_W, height = getActiveViewportH(),
@@ -219,7 +278,7 @@ createDialog = function(savedPos)
           selectedIndex = idx; 
           activeId = currentList[idx].id; 
           app.fgColor = Color{ r = currentList[idx].r, g = currentList[idx].g, b = currentList[idx].b }; 
-          dlg:modify{ id = "info_lbl", text = "Sel: " .. activeId .. "  |  Hov: " .. activeId }; 
+          dlg:modify{ id = "info_lbl", text = "Sel: " .. getFormatStr(selectedIndex) .. "  |  Hov: " .. getFormatStr(selectedIndex) }; 
           dlg:repaint() 
           updateHighlightIfActive(app.activeSprite)
         end
@@ -230,24 +289,25 @@ createDialog = function(savedPos)
       local idx = getIndexAt(ev.x, ev.y)
       if idx ~= hoveredIndex then 
         hoveredIndex = idx
-        dlg:modify{ id = "info_lbl", text = "Sel: " .. activeId .. "  |  Hov: " .. (idx and currentList[idx].id or "-") }
+        dlg:modify{ id = "info_lbl", text = "Sel: " .. getFormatStr(selectedIndex) .. "  |  Hov: " .. getFormatStr(idx) }
         dlg:repaint() 
       end
     end,
     onmouseup = function(ev) if isDragging then isDragging = false; dlg:repaint() end end
   }
 
-  -- Compact Status Row
   dlg:separator()
-  dlg:label{ id = "info_lbl", text = "Sel: " .. activeId .. "  |  Hov: -" }
+  dlg:label{ id = "stats_lbl", text = (currentCat == "[Image Palette]") and ("Colors Used: " .. #currentList) or ("Total Colors: " .. #currentList) }
+  dlg:label{ id = "info_lbl", text = "Sel: " .. getFormatStr(selectedIndex) .. "  |  Hov: -" }
   
-  -- Tools Section (Vertically Stacked for slim UI)
   dlg:separator{ text = "Tools" }
   
   dlg:button{ id = "btn_convert", text = "Convert Image",
     onclick = function()
       if not app.activeSprite then return app.alert("Open a sprite first!") end
       local currentModeColors = getActiveColors()
+      local changedCount = 0
+      
       app.transaction("Convert to MARD Colors", function()
         for _, cel in ipairs(app.activeSprite.cels) do
           if cel.image.colorMode == ColorMode.RGB then
@@ -256,7 +316,10 @@ createDialog = function(savedPos)
               if app.pixelColor.rgbaA(it()) > 0 then
                 local pr, pg, pb = app.pixelColor.rgbaR(it()), app.pixelColor.rgbaG(it()), app.pixelColor.rgbaB(it())
                 local nc = MARD.findNearestColor(pr, pg, pb, currentModeColors)
-                it(app.pixelColor.rgba(nc.r, nc.g, nc.b, app.pixelColor.rgbaA(it())))
+                if pr ~= nc.r or pg ~= nc.g or pb ~= nc.b then
+                  changedCount = changedCount + 1
+                  it(app.pixelColor.rgba(nc.r, nc.g, nc.b, app.pixelColor.rgbaA(it())))
+                end
               end
             end
             cel.image = newImg
@@ -264,6 +327,12 @@ createDialog = function(savedPos)
         end
       end)
       app.refresh()
+      app.alert("Conversion Complete!\n\nChanged " .. changedCount .. " pixels to match standard colors.")
+      
+      -- Auto refresh the Image Palette if we are in that mode
+      if currentCat == "[Image Palette]" then
+        local bounds = dlg.bounds; dlg:close(); createDialog({ x = bounds.x, y = bounds.y, width = bounds.width })
+      end
     end
   }
   
