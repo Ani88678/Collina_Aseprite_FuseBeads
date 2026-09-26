@@ -1,5 +1,5 @@
 -- ============================================================================
--- MARD Palette v6.1 (Pixel Count per Selected Color)
+-- MARD Palette v6.2 (Dynamic Highlight-Linked Palette & Sorting)
 -- ============================================================================
 local MARD = {}
 
@@ -27,7 +27,7 @@ MARD.FONT_3X5 = {
 
 local useFullMode = false
 local currentCat = "All"
-local sortMode = "ID"
+local sortMode = "Quantity (Desc)"
 local selectedIndex = nil
 local hoveredIndex = nil
 local activeId = "-"
@@ -57,9 +57,7 @@ local function getActiveColors()
 end
 
 local function getCatOptions()
-  local opts = useFullMode and { "All", "A", "B", "C", "D", "E", "F", "G", "H", "M", "P", "R", "T" } or { "All", "A", "B", "C", "D", "E", "F", "G", "H", "M" }
-  table.insert(opts, "[Image Palette]")
-  return opts
+  return useFullMode and { "All", "A", "B", "C", "D", "E", "F", "G", "H", "M", "P", "R", "T" } or { "All", "A", "B", "C", "D", "E", "F", "G", "H", "M" }
 end
 
 function MARD.findNearestColor(r, g, b, colorList)
@@ -92,14 +90,29 @@ function MARD.drawPixelText(ctxOrImg, text, startX, startY, color, isCanvas)
   end
 end
 
--- Scan the active sprite to get the exact pixel counts for every color
+local function isHighlightActive(sprite)
+  if not sprite then return false end
+  for _, l in ipairs(sprite.layers) do
+    if l.name == "MARD_Highlight_Mask" then return true end
+  end
+  return false
+end
+
 local function scanImageCounts(sprite)
   globalCounts = {}
   uniqueColorsUsed = 0
   if not sprite then return end
   
   local baseColors = getActiveColors()
+  
+  -- Hide mask if present so counts are not contaminated
+  local hlLayer = nil
+  for _, l in ipairs(sprite.layers) do if l.name == "MARD_Highlight_Mask" then hlLayer = l break end end
+  if hlLayer then hlLayer.isVisible = false end
+  
   local flatImg = Image(sprite)
+  if hlLayer then hlLayer.isVisible = true end
+
   for it in flatImg:pixels() do
     if app.pixelColor.rgbaA(it()) > 0 then
       local pr, pg, pb = app.pixelColor.rgbaR(it()), app.pixelColor.rgbaG(it()), app.pixelColor.rgbaB(it())
@@ -120,22 +133,22 @@ local function updateCurrentList(sprite)
   local baseColors = getActiveColors()
   currentList = {}
   
-  if currentCat == "[Image Palette]" then
-    if not sprite then
-      currentCat = "All"
-      for _, item in ipairs(baseColors) do table.insert(currentList, {id=item.id, r=item.r, g=item.g, b=item.b, cat=item.cat, count=0}) end
-      return
-    end
-
+  local inHighlight = isHighlightActive(sprite)
+  
+  if inHighlight then
+    -- When Highlight is ON: Build dynamic palette of in-use colors only
     for _, c in ipairs(baseColors) do
       if globalCounts[c.id] and globalCounts[c.id] > 0 then
         table.insert(currentList, { id=c.id, r=c.r, g=c.g, b=c.b, cat=c.cat, count=globalCounts[c.id] })
       end
     end
 
-    if sortMode == "Quantity" then
+    -- Sorting operates directly on this in-use palette
+    if sortMode == "Quantity (Desc)" then
       table.sort(currentList, function(a, b) return a.count > b.count end)
-    else
+    elseif sortMode == "Quantity (Asc)" then
+      table.sort(currentList, function(a, b) return a.count < b.count end)
+    else -- ID sort
       table.sort(currentList, function(a, b)
         local c1, n1 = a.id:match("(%a+)(%d+)")
         local c2, n2 = b.id:match("(%a+)(%d+)")
@@ -144,6 +157,7 @@ local function updateCurrentList(sprite)
       end)
     end
   else
+    -- Standard Mode: Filter by Category
     for _, item in ipairs(baseColors) do
       if currentCat == "All" or item.cat == currentCat then
         local cnt = globalCounts[item.id] or 0
@@ -153,34 +167,34 @@ local function updateCurrentList(sprite)
   end
 end
 
-local function isListView() return currentCat == "[Image Palette]" end
-local function getActiveCols() return isListView() and 1 or COLS_GRID end
-local function getTotalRows() return math.max(1, math.ceil(#currentList / getActiveCols())) end
-local function getTotalContentH() return MARGIN * 2 + getTotalRows() * CELL_SIZE + (getTotalRows() - 1) * GAP end
-local function getActiveViewportH() return math.min(getTotalContentH(), MAX_VIEWPORT_H) end
-local function needsScroll() return getTotalContentH() > getActiveViewportH() end
-local function getMaxScroll() return math.max(0, getTotalContentH() - getActiveViewportH()) end
-local function clampScroll() if scrollY < 0 then scrollY = 0 end; local maxS = getMaxScroll(); if scrollY > maxS then scrollY = maxS end end
+local function isListView(sprite) return isHighlightActive(sprite) end
+local function getActiveCols(sprite) return isListView(sprite) and 1 or COLS_GRID end
+local function getTotalRows(sprite) return math.max(1, math.ceil(#currentList / getActiveCols(sprite))) end
+local function getTotalContentH(sprite) return MARGIN * 2 + getTotalRows(sprite) * CELL_SIZE + (getTotalRows(sprite) - 1) * GAP end
+local function getActiveViewportH(sprite) return math.min(getTotalContentH(sprite), MAX_VIEWPORT_H) end
+local function needsScroll(sprite) return getTotalContentH(sprite) > getActiveViewportH(sprite) end
+local function getMaxScroll(sprite) return math.max(0, getTotalContentH(sprite) - getActiveViewportH(sprite)) end
+local function clampScroll(sprite) if scrollY < 0 then scrollY = 0 end; local maxS = getMaxScroll(sprite); if scrollY > maxS then scrollY = maxS end end
 local function getContrastColor(r, g, b) return (0.299 * r + 0.587 * g + 0.114 * b > 140) and Color{ r = 15, g = 15, b = 15 } or Color{ r = 250, g = 250, b = 250 } end
 
-local function getThumbGeometry()
-  local viewH = getActiveViewportH(); local maxS = getMaxScroll(); local trackX = FIXED_VIEWPORT_W - SCROLL_TRACK_W - 1
+local function getThumbGeometry(sprite)
+  local viewH = getActiveViewportH(sprite); local maxS = getMaxScroll(sprite); local trackX = FIXED_VIEWPORT_W - SCROLL_TRACK_W - 1
   if maxS <= 0 then return trackX + 1, 1, SCROLL_BAR_W, viewH - 2, 1, viewH - 2 end
-  local thumbH = math.max(18, math.floor((viewH - 2) * (viewH / getTotalContentH())))
+  local thumbH = math.max(18, math.floor((viewH - 2) * (viewH / getTotalContentH(sprite))))
   return trackX + 1, 1 + math.floor(((viewH - 2) - thumbH) * (scrollY / maxS)), SCROLL_BAR_W, thumbH, 1, viewH - 2
 end
 
-local function getIndexAt(x, y)
-  if needsScroll() and x > FIXED_VIEWPORT_W - SCROLL_TRACK_W - 2 then return nil end
+local function getIndexAt(x, y, sprite)
+  if needsScroll(sprite) and x > FIXED_VIEWPORT_W - SCROLL_TRACK_W - 2 then return nil end
   local vY = y + scrollY - MARGIN; local vX = x - MARGIN
   local col = math.floor(vX / (CELL_SIZE + GAP)); local row = math.floor(vY / (CELL_SIZE + GAP))
   
-  if isListView() then
+  if isListView(sprite) then
     if row >= 0 and row < #currentList then return row + 1 end
     return nil
   end
 
-  if col >= 0 and col < COLS_GRID and row >= 0 and row < getTotalRows() then
+  if col >= 0 and col < COLS_GRID and row >= 0 and row < getTotalRows(sprite) then
     if vX % (CELL_SIZE + GAP) < CELL_SIZE and vY % (CELL_SIZE + GAP) < CELL_SIZE then
       local idx = row * COLS_GRID + col + 1; if idx <= #currentList then return idx end
     end
@@ -188,7 +202,6 @@ local function getIndexAt(x, y)
   return nil
 end
 
--- Clear format showing exact pixel count of this color on the canvas
 local function getPixelCountStr(idx)
   if not idx or not currentList[idx] then return "-" end
   local c = currentList[idx]
@@ -196,11 +209,11 @@ local function getPixelCountStr(idx)
   return c.id .. " (" .. cnt .. " PX)"
 end
 
-local function updateHighlightIfActive(sprite)
+local function updateHighlightMask(sprite)
   if not sprite then return end
   local hlLayer = nil
   for _, l in ipairs(sprite.layers) do if l.name == "MARD_Highlight_Mask" then hlLayer = l break end end
-  if not hlLayer then return end 
+  if not hlLayer then return end
   
   local tc = nil
   local currentModeColors = getActiveColors()
@@ -235,9 +248,11 @@ end
 
 local createDialog
 createDialog = function(savedPos)
-  updateCurrentList(app.activeSprite)
+  local sprite = app.activeSprite
+  updateCurrentList(sprite)
+  local inHighlight = isHighlightActive(sprite)
   
-  local dlg = Dialog{ title = "MARD Palette v6.1" }
+  local dlg = Dialog{ title = inHighlight and "MARD [Highlight Active]" or "MARD Palette v6.2" }
   
   dlg:check{
     id = "full_mode",
@@ -252,34 +267,38 @@ createDialog = function(savedPos)
   }
   
   dlg:newrow()
-  dlg:combobox{
-    id = "cat_filter", label = "Source:", options = getCatOptions(), option = currentCat,
-    onchange = function()
-      currentCat = dlg.data.cat_filter
-      scrollY = 0; selectedIndex = nil; hoveredIndex = nil
-      local bounds = dlg.bounds; dlg:close(); createDialog({ x = bounds.x, y = bounds.y, width = bounds.width })
-    end
-  }
   
-  dlg:combobox{
-    id = "sort_mode", label = "Sort:", options = {"ID", "Quantity"}, option = sortMode,
-    onchange = function()
-      sortMode = dlg.data.sort_mode
-      if currentCat == "[Image Palette]" then
+  if inHighlight then
+    -- When Highlight is active: Display Sort combobox controlling the in-use palette
+    dlg:combobox{
+      id = "sort_mode", label = "Sort Used:", options = {"Quantity (Desc)", "Quantity (Asc)", "ID"}, option = sortMode,
+      onchange = function()
+        sortMode = dlg.data.sort_mode
+        scrollY = 0; selectedIndex = nil; hoveredIndex = nil
         local bounds = dlg.bounds; dlg:close(); createDialog({ x = bounds.x, y = bounds.y, width = bounds.width })
       end
-    end
-  }
+    }
+  else
+    -- Standard Mode: Category filter
+    dlg:combobox{
+      id = "cat_filter", label = "Category:", options = getCatOptions(), option = currentCat,
+      onchange = function()
+        currentCat = dlg.data.cat_filter
+        scrollY = 0; selectedIndex = nil; hoveredIndex = nil
+        local bounds = dlg.bounds; dlg:close(); createDialog({ x = bounds.x, y = bounds.y, width = bounds.width })
+      end
+    }
+  end
 
   dlg:newrow()
   dlg:canvas{
-    id = "palette_canvas", width = FIXED_VIEWPORT_W, height = getActiveViewportH(),
+    id = "palette_canvas", width = FIXED_VIEWPORT_W, height = getActiveViewportH(sprite),
     onpaint = function(ev)
-      local ctx = ev.context; local viewH = getActiveViewportH()
+      local ctx = ev.context; local viewH = getActiveViewportH(sprite)
       ctx.color = Color{ r = 28, g = 28, b = 32 }; ctx:fillRect(Rectangle(0, 0, ev.width, ev.height))
       
       for i, item in ipairs(currentList) do
-        local isList = isListView()
+        local isList = isListView(sprite)
         local col = isList and 0 or ((i - 1) % COLS_GRID)
         local row = isList and (i - 1) or math.floor((i - 1) / COLS_GRID)
         local x = MARGIN + col * (CELL_SIZE + GAP)
@@ -303,38 +322,38 @@ createDialog = function(savedPos)
         end
       end
       
-      if needsScroll() then
+      if needsScroll(sprite) then
         ctx.color = Color{ r = 18, g = 18, b = 22 }; ctx:fillRect(Rectangle(FIXED_VIEWPORT_W - SCROLL_TRACK_W - 1, 0, SCROLL_TRACK_W, viewH))
-        local tx, ty, tw, th = getThumbGeometry()
+        local tx, ty, tw, th = getThumbGeometry(sprite)
         ctx.color = Color{ r = 115, g = 135, b = 155 }; ctx:fillRect(Rectangle(tx, ty + 1, tw, th - 2)); ctx:fillRect(Rectangle(tx + 1, ty, tw - 2, th))
       end
     end,
-    onwheel = function(ev) if needsScroll() and ev.deltaY ~= 0 then scrollY = scrollY + ((ev.deltaY > 0 and 1 or -1) * math.min(math.abs(ev.deltaY) * 4, CELL_SIZE * 1.2)); clampScroll(); dlg:repaint() end end,
+    onwheel = function(ev) if needsScroll(sprite) and ev.deltaY ~= 0 then scrollY = scrollY + ((ev.deltaY > 0 and 1 or -1) * math.min(math.abs(ev.deltaY) * 4, CELL_SIZE * 1.2)); clampScroll(sprite); dlg:repaint() end end,
     onmousedown = function(ev)
       if ev.button == MouseButton.LEFT then
-        if needsScroll() and ev.x >= FIXED_VIEWPORT_W - SCROLL_TRACK_W - 2 then
-          local _, ty, _, th = getThumbGeometry()
+        if needsScroll(sprite) and ev.x >= FIXED_VIEWPORT_W - SCROLL_TRACK_W - 2 then
+          local _, ty, _, th = getThumbGeometry(sprite)
           if ev.y >= ty and ev.y <= ty + th then isDragging = true; dragStartMouseY = ev.y; dragStartScrollY = scrollY
-          else scrollY = scrollY + (ev.y < ty and -getActiveViewportH() * 0.5 or getActiveViewportH() * 0.5); clampScroll(); dlg:repaint() end
+          else scrollY = scrollY + (ev.y < ty and -getActiveViewportH(sprite) * 0.5 or getActiveViewportH(sprite) * 0.5); clampScroll(sprite); dlg:repaint() end
           return
         end
-        local idx = getIndexAt(ev.x, ev.y)
+        local idx = getIndexAt(ev.x, ev.y, sprite)
         if idx then 
           selectedIndex = idx; 
           activeId = currentList[idx].id; 
           app.fgColor = Color{ r = currentList[idx].r, g = currentList[idx].g, b = currentList[idx].b }; 
-          dlg:modify{ id = "info_lbl", text = "Sel: " .. getPixelCountStr(selectedIndex) .. "  |  Hov: " .. getPixelCountStr(selectedIndex) }; 
+          dlg:modify{ id = "info_lbl", text = "Sel: " .. getPixelCountStr(selectedIndex) .. " | Hov: " .. getPixelCountStr(selectedIndex) }; 
           dlg:repaint() 
-          updateHighlightIfActive(app.activeSprite)
+          updateHighlightMask(app.activeSprite)
         end
       end
     end,
     onmousemove = function(ev)
-      if isDragging then local _, _, _, th, _, trackH = getThumbGeometry(); if trackH - th > 0 then scrollY = dragStartScrollY + (ev.y - dragStartMouseY) * (getMaxScroll() / (trackH - th)); clampScroll(); dlg:repaint() end return end
-      local idx = getIndexAt(ev.x, ev.y)
+      if isDragging then local _, _, _, th, _, trackH = getThumbGeometry(sprite); if trackH - th > 0 then scrollY = dragStartScrollY + (ev.y - dragStartMouseY) * (getMaxScroll(sprite) / (trackH - th)); clampScroll(sprite); dlg:repaint() end return end
+      local idx = getIndexAt(ev.x, ev.y, sprite)
       if idx ~= hoveredIndex then 
         hoveredIndex = idx
-        dlg:modify{ id = "info_lbl", text = "Sel: " .. getPixelCountStr(selectedIndex) .. "  |  Hov: " .. getPixelCountStr(idx) }
+        dlg:modify{ id = "info_lbl", text = "Sel: " .. getPixelCountStr(selectedIndex) .. " | Hov: " .. getPixelCountStr(idx) }
         dlg:repaint() 
       end
     end,
@@ -342,8 +361,8 @@ createDialog = function(savedPos)
   }
 
   dlg:separator()
-  dlg:label{ id = "stats_lbl", text = "In-Use Colors: " .. uniqueColorsUsed }
-  dlg:label{ id = "info_lbl", text = "Sel: " .. getPixelCountStr(selectedIndex) .. "  |  Hov: -" }
+  dlg:label{ id = "stats_lbl", text = inHighlight and ("In-Use Colors: " .. #currentList) or ("In-Use: " .. uniqueColorsUsed .. " | Shown: " .. #currentList) }
+  dlg:label{ id = "info_lbl", text = "Sel: " .. getPixelCountStr(selectedIndex) .. " | Hov: -" }
   
   dlg:separator{ text = "Tools" }
   
@@ -380,31 +399,54 @@ createDialog = function(savedPos)
   
   dlg:newrow()
   
-  dlg:button{ id = "btn_highlight", text = "Toggle Highlight",
+  -- Toggle Highlight Button: Toggles mask and instantly switches palette view
+  dlg:button{ id = "btn_highlight", text = inHighlight and "Turn Off Highlight" or "Turn On Highlight",
     onclick = function()
-      local sprite = app.activeSprite
-      if not sprite then return app.alert("Open a sprite first!") end
+      local sp = app.activeSprite
+      if not sp then return app.alert("Open a sprite first!") end
       
       local hlLayer = nil
-      for _, l in ipairs(sprite.layers) do
+      for _, l in ipairs(sp.layers) do
         if l.name == "MARD_Highlight_Mask" then hlLayer = l break end
       end
       
       if hlLayer then
-        app.transaction("Clear Highlight", function() sprite:deleteLayer(hlLayer) end)
+        -- Turn OFF Highlight: delete mask and return to standard grid palette
+        app.transaction("Clear Highlight", function() sp:deleteLayer(hlLayer) end)
         app.refresh()
+        scrollY = 0; selectedIndex = nil; hoveredIndex = nil
+        local bounds = dlg.bounds; dlg:close(); createDialog({ x = bounds.x, y = bounds.y, width = bounds.width })
         return
       end
       
-      if activeId == "-" then return app.alert("Select a base color from the palette first!") end
+      -- Turn ON Highlight
+      scanImageCounts(sp)
+      if uniqueColorsUsed == 0 then return app.alert("Current canvas is empty!") end
+      
+      local baseColors = getActiveColors()
+      local firstColor = nil
+      for _, c in ipairs(baseColors) do
+        if globalCounts[c.id] and globalCounts[c.id] > 0 then firstColor = c; break end
+      end
+      
+      if activeId == "-" or not globalCounts[activeId] or globalCounts[activeId] == 0 then
+        if firstColor then
+          activeId = firstColor.id
+          app.fgColor = Color{ r = firstColor.r, g = firstColor.g, b = firstColor.b }
+        end
+      end
       
       local originalLayer = app.activeLayer
       app.transaction("Create Highlight Mask", function()
-        hlLayer = sprite:newLayer()
+        hlLayer = sp:newLayer()
         hlLayer.name = "MARD_Highlight_Mask"
       end)
       app.activeLayer = originalLayer
-      updateHighlightIfActive(sprite)
+      updateHighlightMask(sp)
+      
+      -- Reopen dialog into Highlight Mode
+      scrollY = 0; selectedIndex = nil; hoveredIndex = nil
+      local bounds = dlg.bounds; dlg:close(); createDialog({ x = bounds.x, y = bounds.y, width = bounds.width })
     end
   }
 
@@ -412,15 +454,20 @@ createDialog = function(savedPos)
   
   dlg:button{ id = "btn_label", text = "Label Pixels",
     onclick = function()
-      local sprite = app.activeSprite
-      if not sprite then return app.alert("Open a sprite first!") end
+      local sp = app.activeSprite
+      if not sp then return app.alert("Open a sprite first!") end
       
       local currentModeColors = getActiveColors()
       local scale = 15 
-      local newSprite = Sprite(sprite.width * scale, sprite.height * scale, ColorMode.RGB)
+      local newSprite = Sprite(sp.width * scale, sp.height * scale, ColorMode.RGB)
       
       app.transaction("Generate Pixel Labels", function()
-        local flatImg = Image(sprite)
+        local hlLayer = nil
+        for _, l in ipairs(sp.layers) do if l.name == "MARD_Highlight_Mask" then hlLayer = l break end end
+        if hlLayer then hlLayer.isVisible = false end
+        local flatImg = Image(sp)
+        if hlLayer then hlLayer.isVisible = true end
+        
         local outImg = newSprite.cels[1].image
         outImg:clear()
         
